@@ -152,9 +152,26 @@ const insertAsteroidsToDB = async (pool, asteroids) => {
       date_range_end
     )
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+ 
     ON CONFLICT (neo_reference_id, date_range_start, date_range_end)
-    DO NOTHING
-    returning *;
+    DO UPDATE SET
+      name = EXCLUDED.name, 
+      estimated_diameter_min = EXCLUDED.estimated_diameter_min,
+      estimated_diameter_max = EXCLUDED.estimated_diameter_max,
+      average_diameter = EXCLUDED.average_diameter,
+      is_potentially_hazardous_asteroid = EXCLUDED.is_potentially_hazardous_asteroid,
+      close_approach_date = EXCLUDED.close_approach_date,
+      miss_distance_km = EXCLUDED.miss_distance_km,
+      velocity_kmh = EXCLUDED.velocity_kmh,
+      orbiting_body = EXCLUDED.orbiting_body,
+      first_observation_date = EXCLUDED.first_observation_date,
+      last_observation_date = EXCLUDED.last_observation_date,
+      observations_used = EXCLUDED.observations_used,
+      orbital_period = EXCLUDED.orbital_period,
+      eccentricity = EXCLUDED.eccentricity,
+      data_arc_in_days = EXCLUDED.data_arc_in_days,
+      nasa_jpl_url = EXCLUDED.nasa_jpl_url
+    RETURNING *;
   `;
 
 const results = [];
