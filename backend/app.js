@@ -139,19 +139,35 @@ const processAsteroid = (asteroid) => {
     orbital_data,
     nasa_jpl_url,
     query_date,
+    // flattened fields:
+    close_approach_date,
+    miss_distance_km,
+    relative_velocity_kph,
+    orbiting_body,
   } = asteroid;
 
   // Extract diameter data
-  const diameterMin = estimated_diameter.meters.estimated_diameter_min;
-  const diameterMax = estimated_diameter.meters.estimated_diameter_max;
+  const diameterMin = estimated_diameter?.meters?.estimated_diameter_min
+    ?? asteroid.estimated_diameter_km_min * 1000
+    ?? 0;
+  const diameterMax = estimated_diameter?.meters?.estimated_diameter_max
+    ?? asteroid.estimated_diameter_km_max * 1000
+    ?? 0;
   const averageDiameter = (diameterMin + diameterMax) / 2;
 
-  // Extract the closest approach data (use the first record)
-  const closeApproach = close_approach_data?.[0] || {};
-  const closeApproachDate = closeApproach.close_approach_date;
-  const missDistanceKm = closeApproach.miss_distance?.kilometers || 0;
-  const velocityKmh = closeApproach.relative_velocity?.kilometers_per_hour || 0;
-  const orbitingBody = closeApproach.orbiting_body || '';
+  // Prefer flattened fields, fallback to nested
+  const closeApproachDate = close_approach_date
+    || close_approach_data?.[0]?.close_approach_date
+    || '';
+  const missDistanceKm = miss_distance_km
+    || close_approach_data?.[0]?.miss_distance?.kilometers
+    || 0;
+  const velocityKmh = relative_velocity_kph
+    || close_approach_data?.[0]?.relative_velocity?.kilometers_per_hour
+    || 0;
+  const orbitingBody = orbiting_body
+    || close_approach_data?.[0]?.orbiting_body
+    || '';
 
   // Extract orbital data
   const observationsUsed = orbital_data?.observations_used || 0;
@@ -159,7 +175,6 @@ const processAsteroid = (asteroid) => {
   const eccentricity = orbital_data?.eccentricity || 0;
   const dataArcInDays = orbital_data?.data_arc_in_days || 0;
 
-  // Return processed asteroid data for insertion
   return {
     neo_reference_id,
     name,
