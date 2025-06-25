@@ -139,7 +139,6 @@ const processAsteroid = (asteroid) => {
     orbital_data,
     nasa_jpl_url,
     query_date,
-    // flattened fields:
     close_approach_date,
     miss_distance_km,
     relative_velocity_kph,
@@ -155,7 +154,7 @@ const processAsteroid = (asteroid) => {
     ?? 0;
   const averageDiameter = (diameterMin + diameterMax) / 2;
 
-  // Prefer flattened fields, fallback to nested
+  // fallback to nested if flattened data is not available
   const closeApproachDate = close_approach_date
     || close_approach_data?.[0]?.close_approach_date
     || '';
