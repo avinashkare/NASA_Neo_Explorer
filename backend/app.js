@@ -247,7 +247,7 @@ const insertAsteroidsToDB = async (pool, asteroids) => {
 /**
  * Endpoint to get asteroid data (fetch from NASA and store it in DB if not available)
  */
-app.get('/neos/list', async (req, res) => {
+app.get('/api/neos/list', async (req, res) => {
   const { startDate, endDate } = req.query; // Get the date range from query parameters
 
   // Validate date range
