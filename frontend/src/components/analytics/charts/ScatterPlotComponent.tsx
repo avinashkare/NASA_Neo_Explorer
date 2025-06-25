@@ -25,13 +25,21 @@ export const ScatterPlotComponent: React.FC<ScatterPlotComponentProps> = ({ data
   const maxY = Math.max(...data.map(d => d.y));
   const minX = Math.min(...data.map(d => d.x));
   const minY = Math.min(...data.map(d => d.y));
-  
+
   const width = 300;
   const height = 200;
   const padding = 40;
 
-  const scaleX = (x: number) => ((x - minX) / (maxX - minX)) * (width - 2 * padding) + padding;
-  const scaleY = (y: number) => height - padding - ((y - minY) / (maxY - minY)) * (height - 2 * padding);
+  // Protect against division by zero if all points have the same x or y
+  const scaleX = (x: number) => {
+    if (maxX === minX) return padding;  // Handle edge case where all x values are the same
+    return ((x - minX) / (maxX - minX)) * (width - 2 * padding) + padding;
+  };
+
+  const scaleY = (y: number) => {
+    if (maxY === minY) return height - padding;  // Handle edge case where all y values are the same
+    return height - padding - ((y - minY) / (maxY - minY)) * (height - 2 * padding);
+  };
 
   return (
     <div className="flex items-center justify-center h-full">
