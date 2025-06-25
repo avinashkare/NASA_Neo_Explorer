@@ -13,12 +13,12 @@ export const AsteroidDetails: React.FC<AsteroidDetailsProps> = ({ asteroid, onCl
     asteroid.estimated_diameter_min +
     asteroid.estimated_diameter_max
   ) / 2;
-  
+
   const bestComparison = findBestComparison(avgDiameter);
   const comparisonText = formatSizeComparison(avgDiameter, bestComparison);
-  
+
   const nextApproach = asteroid.close_approach_data?.[0];
-  
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl">

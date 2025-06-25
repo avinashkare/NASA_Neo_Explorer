@@ -20,6 +20,12 @@ export interface AnalyticsData {
   orbitingBodiesData: Array<{ name: string; value: number; color: string }>;
 }
 
+/**
+ * Applies filters to the list of asteroids based on the provided filters.
+ * @param asteroids - The list of asteroids to filter.
+ * @param filters - The filters to apply.
+ * @return The filtered list of asteroids.
+ */
 const applyFilters = (asteroids: Asteroid[], filters: AnalyticsFilters): Asteroid[] => {
   return asteroids.filter(asteroid => {
     // Search filter
@@ -77,6 +83,12 @@ const applyFilters = (asteroids: Asteroid[], filters: AnalyticsFilters): Asteroi
   });
 };
 
+/**
+ * Fetches and processes analytics data based on the provided asteroid list and filters.
+ * @param asteroids - The list of asteroids to analyze.
+ * @param filters - The filters to apply to the asteroid data.
+ * @returns - An object containing the filtered asteroids and various analytics statistics.
+ */
 export const useAnalyticsData = (
   asteroids: Asteroid[], 
   filters: AnalyticsFilters

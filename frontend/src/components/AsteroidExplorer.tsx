@@ -49,12 +49,24 @@ export const AsteroidExplorer: React.FC<AsteroidExplorerProps> = ({ onNavigateTo
   };
 
   const handleApplyDates = () => {
-    if (endDate < startDate) {
-      alert('End date cannot be before start date');
-      return;
-    }
-    loadAsteroids(startDate, endDate);
-  };
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffInMs = end.getTime() - start.getTime();
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+  if (endDate < startDate) {
+    alert('End date cannot be before start date');
+    return;
+  }
+
+  if (diffInDays > 7) {
+    alert('Date range cannot exceed 7 days. Please select a shorter range.');
+    return;
+  }
+
+  loadAsteroids(startDate, endDate);
+};
+
 
   const filteredAsteroids = useMemo(() => {
     if (!asteroids || asteroids.length === 0) {

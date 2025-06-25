@@ -7,9 +7,9 @@ interface AsteroidAnalyticsProps {
   onBack: () => void;
 }
 
-export const AsteroidAnalytics: React.FC<AsteroidAnalyticsProps> = ({ 
-  asteroids, 
-  onBack 
+export const AsteroidAnalytics: React.FC<AsteroidAnalyticsProps> = ({
+  asteroids,
+  onBack
 }) => {
   return <AnalyticsContainer asteroids={asteroids} onBack={onBack} />;
 };

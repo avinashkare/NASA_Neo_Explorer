@@ -1,5 +1,9 @@
 import React from 'react';
 
+/**
+ * LoadingSpinner component displays a loading spinner with a gradient effect and a message.
+ * @returns 
+ */
 export const LoadingSpinner: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px]">

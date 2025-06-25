@@ -6,6 +6,10 @@ interface ErrorMessageProps {
   onRetry?: () => void;
 }
 
+/**
+ * ErrorMessage component displays an error message with an optional retry button.
+ * @returns 
+ */
 export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onRetry }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] p-8">

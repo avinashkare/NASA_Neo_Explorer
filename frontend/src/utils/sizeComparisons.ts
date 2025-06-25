@@ -43,6 +43,11 @@ export const sizeComparisons: SizeComparison[] = [
   }
 ];
 
+/**
+ * Finds the best size comparison for a given asteroid size.
+ * @param asteroidSize - The size of the asteroid in meters.
+ * @returns - The closest size comparison object.
+ */
 export function findBestComparison(asteroidSize: number): SizeComparison {
   // Find the closest size comparison
   const sortedComparisons = sizeComparisons
@@ -55,13 +60,19 @@ export function findBestComparison(asteroidSize: number): SizeComparison {
   return sortedComparisons[0];
 }
 
+/**
+ * Formats a size comparison string for an asteroid against a given comparison.
+ * @param asteroidSize - The size of the asteroid in meters.
+ * @param comparison - The size comparison object to compare against.
+ * @returns - A formatted string indicating the size comparison.
+ */
 export function formatSizeComparison(asteroidSize: number, comparison: SizeComparison): string {
   const ratio = asteroidSize / comparison.height;
-  
+
   if (ratio > 1.5) {
     return `${ratio.toFixed(1)}x larger than ${comparison.name}`;
   } else if (ratio < 0.7) {
-    return `${(1/ratio).toFixed(1)}x smaller than ${comparison.name}`;
+    return `${(1 / ratio).toFixed(1)}x smaller than ${comparison.name}`;
   } else {
     return `Similar in size to ${comparison.name}`;
   }
