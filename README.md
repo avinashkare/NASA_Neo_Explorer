@@ -62,35 +62,36 @@ A modern, interactive web application for exploring Near Earth Objects (NEOs) fr
    ```sql
    -- Create PostgreSQL database
    CREATE DATABASE asteroid_db;
-   
+
    -- Run the schema (from root directory)
    psql -d asteroid_db -f database/schema.sql
 
    -- Create asteroids table
    CREATE TABLE asteroids (
-  id SERIAL,
-  neo_reference_id VARCHAR(255) primary key,
-  name VARCHAR(255),
-  estimated_diameter_min FLOAT,
-  estimated_diameter_max FLOAT,
-  average_diameter FLOAT,
-  is_potentially_hazardous_asteroid BOOLEAN,
-  close_approach_date DATE,
-  miss_distance_km FLOAT,
-  velocity_kmh FLOAT,
-  orbiting_body VARCHAR(255),
-  first_observation_date DATE,
-  last_observation_date DATE,
-  observations_used INT,
-  orbital_period FLOAT,
-  eccentricity FLOAT,
-  data_arc_in_days INT,
-  nasa_jpl_url VARCHAR(255),
-  date_range_start DATE,
-  date_range_end DATE,
-  CONSTRAINT unique_neo_reference UNIQUE (neo_reference_id)
-);
+     id SERIAL,
+     neo_reference_id VARCHAR(255) PRIMARY KEY,
+     name VARCHAR(255),
+     estimated_diameter_min FLOAT,
+     estimated_diameter_max FLOAT,
+     average_diameter FLOAT,
+     is_potentially_hazardous_asteroid BOOLEAN,
+     close_approach_date DATE,
+     miss_distance_km FLOAT,
+     velocity_kmh FLOAT,
+     orbiting_body VARCHAR(255),
+     first_observation_date DATE,
+     last_observation_date DATE,
+     observations_used INT,
+     orbital_period FLOAT,
+     eccentricity FLOAT,
+     data_arc_in_days INT,
+     nasa_jpl_url VARCHAR(255),
+     date_range_start DATE,
+     date_range_end DATE,
+     CONSTRAINT unique_neo_reference UNIQUE (neo_reference_id)
+   );
    ```
+
 
 4. **Environment configuration**
    Create `.env` file in the backend directory:
