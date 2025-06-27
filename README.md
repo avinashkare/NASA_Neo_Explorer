@@ -240,10 +240,10 @@ npm install && npm run build
 Start Command
 ```bash
 npm run start
-```
 
 # Set environment variables
 VITE_BASE_URL=your_backend_webservice_adderess_here
+```
 
 ## 📚 Data Sources
 
