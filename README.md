@@ -90,7 +90,6 @@ A modern, interactive web application for exploring Near Earth Objects (NEOs) fr
   date_range_end DATE,
   CONSTRAINT unique_neo_reference UNIQUE (neo_reference_id)
 );
-   ``
 
 
 4. **Environment configuration**
