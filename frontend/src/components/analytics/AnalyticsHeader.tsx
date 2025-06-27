@@ -1,18 +1,16 @@
 import React from 'react';
-import { ArrowLeft, Download, Database } from 'lucide-react';
+import { ArrowLeft, Database } from 'lucide-react';
 
 interface AnalyticsHeaderProps {
   onBack: () => void;
   totalAsteroids: number;
   filteredCount: number;
-  onExport: () => void;
 }
 
 export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
   onBack,
   totalAsteroids,
-  filteredCount,
-  onExport
+  filteredCount
 }) => {
   return (
     <header className="bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-40">
@@ -48,14 +46,6 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
                 <span className="text-gray-400"> asteroids</span>
               </div>
             </div>
-
-            <button
-              onClick={onExport}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 shadow-lg shadow-blue-500/25"
-            >
-              <Download size={16} />
-              Export Data
-            </button>
           </div>
         </div>
       </div>

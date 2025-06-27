@@ -4,7 +4,7 @@ import { AnalyticsHeader } from './AnalyticsHeader';
 import { AnalyticsFilters } from './AnalyticsFilters';
 import { AnalyticsCharts } from './AnalyticsCharts';
 import { AnalyticsInsights } from './AnalyticsInsights';
-import { AnalyticsExport } from './AnalyticsExport';
+import { AsteroidTable } from './AsteroidTable';
 import { useAnalyticsData } from '../../hooks/useAnalyticsData';
 
 export interface AnalyticsFilters {
@@ -39,7 +39,7 @@ export const AnalyticsContainer: React.FC<AnalyticsContainerProps> = ({
   });
 
   const [selectedChart, setSelectedChart] = useState<string>('overview');
-  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedAsteroid, setSelectedAsteroid] = useState<Asteroid | null>(null);
 
   const analyticsData = useAnalyticsData(asteroids, filters);
 
@@ -47,11 +47,11 @@ export const AnalyticsContainer: React.FC<AnalyticsContainerProps> = ({
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
 
-  const handleExportData = (format: 'json' | 'csv' | 'pdf') => {
-    // Export functionality implementation
-    console.log(`Exporting data as ${format}`);
-    setShowExportModal(false);
-  };
+  // Show table when there's a search term or other filters applied
+  const showTable = filters.searchTerm || 
+                   filters.hazardFilter !== 'all' || 
+                   filters.sizeFilter !== 'all' || 
+                   filters.orbitingBodyFilter.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
@@ -59,7 +59,6 @@ export const AnalyticsContainer: React.FC<AnalyticsContainerProps> = ({
         onBack={onBack}
         totalAsteroids={asteroids.length}
         filteredCount={analyticsData.filteredAsteroids.length}
-        onExport={() => setShowExportModal(true)}
       />
 
       <main className="container mx-auto px-4 py-8 space-y-8">
@@ -79,15 +78,16 @@ export const AnalyticsContainer: React.FC<AnalyticsContainerProps> = ({
           selectedChart={selectedChart}
           onChartChange={setSelectedChart}
         />
-      </main>
 
-      {showExportModal && (
-        <AnalyticsExport 
-          data={analyticsData.filteredAsteroids}
-          onExport={handleExportData}
-          onClose={() => setShowExportModal(false)}
-        />
-      )}
+        {/* Show filtered asteroid table when search/filters are applied */}
+        {showTable && (
+          <AsteroidTable 
+            asteroids={analyticsData.filteredAsteroids}
+            selectedAsteroid={selectedAsteroid}
+            onAsteroidSelect={setSelectedAsteroid}
+          />
+        )}
+      </main>
     </div>
   );
 };

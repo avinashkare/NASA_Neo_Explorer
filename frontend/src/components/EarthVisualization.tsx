@@ -9,11 +9,7 @@ export const EarthVisualization: React.FC<EarthVisualizationProps> = ({ classNam
     <div className={`relative ${className}`}>
       {/* Earth with enhanced rotation animation */}
       <div className="relative w-40 h-40 mx-auto">
-        {/* Earth's gravitational field visualization */}
-        <div className="absolute -inset-8 rounded-full bg-gradient-to-r from-blue-500/5 to-cyan-500/5 animate-pulse"></div>
-        <div className="absolute -inset-6 rounded-full bg-gradient-to-r from-blue-400/10 to-cyan-400/10 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-        <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-blue-300/15 to-cyan-300/15 animate-pulse" style={{ animationDelay: '1s' }}></div>
-
+        {/* Removed glowing effects - keeping only the magnetic field indicators */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 shadow-2xl animate-spin-slow">
           {/* Earth surface details with rotation */}
           <div className="absolute inset-2 rounded-full bg-gradient-to-br from-green-400 via-blue-500 to-blue-600 opacity-70 overflow-hidden">
@@ -27,11 +23,6 @@ export const EarthVisualization: React.FC<EarthVisualizationProps> = ({ classNam
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-spin-reverse opacity-30"></div>
             <div className="absolute inset-1 rounded-full bg-gradient-to-l from-white/5 via-transparent to-white/5 animate-spin-slow opacity-20"></div>
           </div>
-
-          {/* Enhanced atmosphere glow with pulsing effect */}
-          <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-blue-300 to-cyan-300 opacity-20 blur-sm animate-pulse"></div>
-          <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-blue-200 to-cyan-200 opacity-10 blur-md animate-pulse"></div>
-          <div className="absolute -inset-6 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 opacity-5 blur-lg animate-pulse"></div>
         </div>
 
         {/* Magnetic field lines */}

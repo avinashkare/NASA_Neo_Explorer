@@ -21,24 +21,43 @@ export const ScatterPlotComponent: React.FC<ScatterPlotComponentProps> = ({ data
     );
   }
 
-  const maxX = Math.max(...data.map(d => d.x));
-  const maxY = Math.max(...data.map(d => d.y));
-  const minX = Math.min(...data.map(d => d.x));
-  const minY = Math.min(...data.map(d => d.y));
+  // Filter out invalid data and provide fallbacks
+  const validData = data.filter(d => 
+    !isNaN(d.x) && !isNaN(d.y) && 
+    isFinite(d.x) && isFinite(d.y) &&
+    d.x !== null && d.y !== null &&
+    d.x !== undefined && d.y !== undefined
+  );
+
+  if (validData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-400">
+        No valid data available for visualization
+      </div>
+    );
+  }
+
+  const maxX = Math.max(...validData.map(d => d.x));
+  const maxY = Math.max(...validData.map(d => d.y));
+  const minX = Math.min(...validData.map(d => d.x));
+  const minY = Math.min(...validData.map(d => d.y));
 
   const width = 300;
   const height = 200;
   const padding = 40;
 
-  // Protect against division by zero if all points have the same x or y
+  // Protect against division by zero
+  const xRange = maxX - minX;
+  const yRange = maxY - minY;
+  
   const scaleX = (x: number) => {
-    if (maxX === minX) return padding;  // Handle edge case where all x values are the same
-    return ((x - minX) / (maxX - minX)) * (width - 2 * padding) + padding;
+    if (xRange === 0) return width / 2; // Center if no range
+    return ((x - minX) / xRange) * (width - 2 * padding) + padding;
   };
 
   const scaleY = (y: number) => {
-    if (maxY === minY) return height - padding;  // Handle edge case where all y values are the same
-    return height - padding - ((y - minY) / (maxY - minY)) * (height - 2 * padding);
+    if (yRange === 0) return height / 2; // Center if no range
+    return height - padding - ((y - minY) / yRange) * (height - 2 * padding);
   };
 
   return (
@@ -65,21 +84,31 @@ export const ScatterPlotComponent: React.FC<ScatterPlotComponentProps> = ({ data
         </text>
         
         {/* Data points */}
-        {data.map((point, index) => (
-          <circle
-            key={index}
-            cx={scaleX(point.x)}
-            cy={scaleY(point.y)}
-            r={point.hazardous ? "6" : "4"}
-            fill={point.color}
-            stroke={point.hazardous ? "#ffffff" : "none"}
-            strokeWidth={point.hazardous ? "2" : "0"}
-            opacity="0.8"
-            className="hover:opacity-100 hover:r-8 transition-all duration-200 cursor-pointer"
-          >
-            <title>{`${point.name}: ${point.x.toFixed(1)}m, ${point.y.toLocaleString()} km/h`}</title>
-          </circle>
-        ))}
+        {validData.map((point, index) => {
+          const cx = scaleX(point.x);
+          const cy = scaleY(point.y);
+          
+          // Additional safety check for calculated coordinates
+          if (isNaN(cx) || isNaN(cy) || !isFinite(cx) || !isFinite(cy)) {
+            return null;
+          }
+          
+          return (
+            <circle
+              key={index}
+              cx={cx}
+              cy={cy}
+              r={point.hazardous ? "6" : "4"}
+              fill={point.color}
+              stroke={point.hazardous ? "#ffffff" : "none"}
+              strokeWidth={point.hazardous ? "2" : "0"}
+              opacity="0.8"
+              className="hover:opacity-100 hover:r-8 transition-all duration-200 cursor-pointer"
+            >
+              <title>{`${point.name}: ${point.x.toFixed(1)}m, ${point.y.toLocaleString()} km/h`}</title>
+            </circle>
+          );
+        })}
         
         {/* Legend */}
         <g transform={`translate(${width - 100}, 20)`}>

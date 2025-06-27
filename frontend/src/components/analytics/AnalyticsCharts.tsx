@@ -4,12 +4,17 @@ import {
   BarChart3, 
   Activity, 
   Target,
-  Orbit
+  Zap,
+  TrendingUp,
+  Calendar,
+  Gauge
 } from 'lucide-react';
 import { AnalyticsCard } from './AnalyticsCard';
 import { PieChartComponent } from './charts/PieChartComponent';
 import { BarChartComponent } from './charts/BarChartComponent';
 import { RadarChartComponent } from './charts/RadarChartComponent';
+import { ScatterPlotComponent } from './charts/ScatterPlotComponent';
+import { AreaChartComponent } from './charts/AreaChartComponent';
 import { AnalyticsData } from '../../hooks/useAnalyticsData';
 
 interface AnalyticsChartsProps {
@@ -46,6 +51,22 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
           >
             <BarChartComponent data={data.sizeDistribution} />
           </AnalyticsCard>
+
+          <AnalyticsCard
+            title="Approach Timeline"
+            icon={<TrendingUp className="text-green-400" size={20} />}
+            description="Asteroid approaches over time"
+          >
+            <AreaChartComponent data={data.timeSeriesData} />
+          </AnalyticsCard>
+
+          <AnalyticsCard
+            title="Size vs Velocity"
+            icon={<Zap className="text-yellow-400" size={20} />}
+            description="Correlation between size and velocity"
+          >
+            <ScatterPlotComponent data={data.sizeVsVelocityData} />
+          </AnalyticsCard>
         </div>
       )
     },
@@ -71,30 +92,103 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
           >
             <BarChartComponent data={data.hazardousSizeDistribution} />
           </AnalyticsCard>
+
+          <AnalyticsCard
+            title="Risk Assessment"
+            icon={<Gauge className="text-red-400" size={20} />}
+            description="Multi-dimensional risk analysis"
+          >
+            <RadarChartComponent data={data.riskAssessmentData} />
+          </AnalyticsCard>
+
+          <AnalyticsCard
+            title="Miss Distance Distribution"
+            icon={<Target className="text-purple-400" size={20} />}
+            description="How close asteroids come to Earth"
+          >
+            <PieChartComponent data={data.missDistanceDistribution} />
+          </AnalyticsCard>
         </div>
       )
     },
     {
-      id: 'orbital-analysis',
-      title: 'Orbital Analysis',
-      description: 'Orbital mechanics and characteristics',
-      icon: Orbit,
+      id: 'velocity-analysis',
+      title: 'Velocity & Motion Analysis',
+      description: 'Speed and trajectory characteristics',
+      icon: Zap,
       component: () => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AnalyticsCard
-            title="Orbital Characteristics"
-            icon={<Activity className="text-purple-400" size={20} />}
-            description="Multi-dimensional orbital analysis"
+            title="Velocity Distribution"
+            icon={<Zap className="text-yellow-400" size={20} />}
+            description="Speed categories of asteroids"
           >
-            <RadarChartComponent data={data.orbitalData} />
+            <BarChartComponent data={data.velocityDistribution} />
           </AnalyticsCard>
           
           <AnalyticsCard
-            title="Orbiting Bodies"
-            icon={<PieChart className="text-blue-400" size={20} />}
-            description="Distribution by orbiting body"
+            title="Size vs Velocity Correlation"
+            icon={<Activity className="text-cyan-400" size={20} />}
+            description="Relationship between size and speed"
           >
-            <PieChartComponent data={data.orbitingBodiesData} />
+            <ScatterPlotComponent data={data.sizeVsVelocityData} />
+          </AnalyticsCard>
+
+          <AnalyticsCard
+            title="Magnitude Distribution"
+            icon={<BarChart3 className="text-purple-400" size={20} />}
+            description="Brightness classification"
+          >
+            <BarChartComponent data={data.magnitudeDistribution} />
+          </AnalyticsCard>
+
+          <AnalyticsCard
+            title="Approach Frequency"
+            icon={<Calendar className="text-green-400" size={20} />}
+            description="Monthly approach patterns"
+          >
+            <PieChartComponent data={data.approachFrequencyData} />
+          </AnalyticsCard>
+        </div>
+      )
+    },
+    {
+      id: 'temporal-analysis',
+      title: 'Temporal Analysis',
+      description: 'Time-based patterns and trends',
+      icon: Calendar,
+      component: () => (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <AnalyticsCard
+            title="Approach Timeline"
+            icon={<TrendingUp className="text-blue-400" size={20} />}
+            description="Asteroid approaches over time"
+          >
+            <AreaChartComponent data={data.timeSeriesData} />
+          </AnalyticsCard>
+          
+          <AnalyticsCard
+            title="Monthly Frequency"
+            icon={<Calendar className="text-green-400" size={20} />}
+            description="Seasonal approach patterns"
+          >
+            <PieChartComponent data={data.approachFrequencyData} />
+          </AnalyticsCard>
+
+          <AnalyticsCard
+            title="Miss Distance Trends"
+            icon={<Activity className="text-purple-400" size={20} />}
+            description="Distance distribution analysis"
+          >
+            <BarChartComponent data={data.missDistanceDistribution} />
+          </AnalyticsCard>
+
+          <AnalyticsCard
+            title="Risk Assessment Matrix"
+            icon={<Gauge className="text-red-400" size={20} />}
+            description="Comprehensive risk evaluation"
+          >
+            <RadarChartComponent data={data.riskAssessmentData} />
           </AnalyticsCard>
         </div>
       )
@@ -109,7 +203,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
           <Activity className="text-purple-400" size={24} />
           Analysis Categories
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {chartConfigs.map((config) => (
             <button
               key={config.id}

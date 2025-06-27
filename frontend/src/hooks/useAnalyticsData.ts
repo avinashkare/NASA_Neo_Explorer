@@ -8,6 +8,9 @@ export interface AnalyticsStatistics {
   averageSize: number;
   largestAsteroid: number;
   averageMagnitude: number;
+  averageVelocity: number;
+  averageMissDistance: number;
+  totalApproaches: number;
 }
 
 export interface AnalyticsData {
@@ -16,15 +19,17 @@ export interface AnalyticsData {
   hazardDistribution: Array<{ name: string; value: number; color: string }>;
   sizeDistribution: Array<{ name: string; value: number; color: string }>;
   hazardousSizeDistribution: Array<{ name: string; value: number; color: string }>;
-  orbitalData: Array<{ subject: string; A: number; fullMark: number }>;
-  orbitingBodiesData: Array<{ name: string; value: number; color: string }>;
+  velocityDistribution: Array<{ name: string; value: number; color: string }>;
+  missDistanceDistribution: Array<{ name: string; value: number; color: string }>;
+  magnitudeDistribution: Array<{ name: string; value: number; color: string }>;
+  sizeVsVelocityData: Array<{ x: number; y: number; name: string; hazardous: boolean; color: string }>;
+  timeSeriesData: Array<{ date: string; count: number; x: string; y: number }>;
+  riskAssessmentData: Array<{ subject: string; A: number; fullMark: number }>;
+  approachFrequencyData: Array<{ name: string; value: number; color: string }>;
 }
 
 /**
  * Applies filters to the list of asteroids based on the provided filters.
- * @param asteroids - The list of asteroids to filter.
- * @param filters - The filters to apply.
- * @return The filtered list of asteroids.
  */
 const applyFilters = (asteroids: Asteroid[], filters: AnalyticsFilters): Asteroid[] => {
   return asteroids.filter(asteroid => {
@@ -68,7 +73,9 @@ const applyFilters = (asteroids: Asteroid[], filters: AnalyticsFilters): Asteroi
 
     // Orbiting body filter
     if (filters.orbitingBodyFilter.length > 0) {
-      if (!asteroid.orbiting_body || !filters.orbitingBodyFilter.includes(asteroid.orbiting_body)) {
+      const orbitingBody = asteroid.orbiting_body || 
+                          asteroid.close_approach_data?.[0]?.orbiting_body;
+      if (!orbitingBody || !filters.orbitingBodyFilter.includes(orbitingBody)) {
         return false;
       }
     }
@@ -84,10 +91,15 @@ const applyFilters = (asteroids: Asteroid[], filters: AnalyticsFilters): Asteroi
 };
 
 /**
+ * Safely extracts numeric values with fallbacks
+ */
+const safeNumeric = (value: any, fallback: number = 0): number => {
+  const num = parseFloat(value);
+  return isNaN(num) || !isFinite(num) ? fallback : num;
+};
+
+/**
  * Fetches and processes analytics data based on the provided asteroid list and filters.
- * @param asteroids - The list of asteroids to analyze.
- * @param filters - The filters to apply to the asteroid data.
- * @returns - An object containing the filtered asteroids and various analytics statistics.
  */
 export const useAnalyticsData = (
   asteroids: Asteroid[], 
@@ -96,17 +108,39 @@ export const useAnalyticsData = (
   return useMemo(() => {
     const filteredAsteroids = applyFilters(asteroids, filters);
 
-    // Statistics
+    // Calculate statistics with proper data extraction
     const hazardousCount = filteredAsteroids.filter(a => a.is_potentially_hazardous_asteroid).length;
-    const sizes = filteredAsteroids.map(a => (a.estimated_diameter_min + a.estimated_diameter_max) / 2);
-    const magnitudes = filteredAsteroids.map(a => a.absolute_magnitude_h);
+    
+    const sizes = filteredAsteroids.map(a => 
+      safeNumeric((a.estimated_diameter_min + a.estimated_diameter_max) / 2)
+    ).filter(size => size > 0);
+    
+    const magnitudes = filteredAsteroids.map(a => 
+      safeNumeric(a.absolute_magnitude_h)
+    ).filter(mag => mag > 0);
+
+    const velocities = filteredAsteroids.map(a => {
+      const vel = a.velocity_kmh || 
+                  a.close_approach_data?.[0]?.relative_velocity?.kilometers_per_hour;
+      return safeNumeric(vel);
+    }).filter(vel => vel > 0);
+
+    const missDistances = filteredAsteroids.map(a => {
+      const distance = a.miss_distance_km || 
+                      a.close_approach_data?.[0]?.miss_distance?.kilometers;
+      return safeNumeric(distance);
+    }).filter(dist => dist > 0);
 
     const statistics: AnalyticsStatistics = {
       totalAsteroids: filteredAsteroids.length,
       hazardousCount,
       averageSize: sizes.length > 0 ? sizes.reduce((a, b) => a + b, 0) / sizes.length : 0,
       largestAsteroid: sizes.length > 0 ? Math.max(...sizes) : 0,
-      averageMagnitude: magnitudes.length > 0 ? magnitudes.reduce((a, b) => a + b, 0) / magnitudes.length : 0
+      averageMagnitude: magnitudes.length > 0 ? magnitudes.reduce((a, b) => a + b, 0) / magnitudes.length : 0,
+      averageVelocity: velocities.length > 0 ? velocities.reduce((a, b) => a + b, 0) / velocities.length : 0,
+      averageMissDistance: missDistances.length > 0 ? missDistances.reduce((a, b) => a + b, 0) / missDistances.length : 0,
+      totalApproaches: filteredAsteroids.reduce((total, asteroid) => 
+        total + (asteroid.close_approach_data?.length || 0), 0)
     };
 
     // Hazard Distribution
@@ -126,7 +160,7 @@ export const useAnalyticsData = (
     const sizeDistribution = sizeRanges.map(range => ({
       name: range.name,
       value: filteredAsteroids.filter(asteroid => {
-        const avgSize = (asteroid.estimated_diameter_min + asteroid.estimated_diameter_max) / 2;
+        const avgSize = safeNumeric((asteroid.estimated_diameter_min + asteroid.estimated_diameter_max) / 2);
         return avgSize >= range.min && avgSize < range.max;
       }).length,
       color: range.color
@@ -137,31 +171,135 @@ export const useAnalyticsData = (
     const hazardousSizeDistribution = sizeRanges.map(range => ({
       name: range.name,
       value: hazardousAsteroids.filter(asteroid => {
-        const avgSize = (asteroid.estimated_diameter_min + asteroid.estimated_diameter_max) / 2;
+        const avgSize = safeNumeric((asteroid.estimated_diameter_min + asteroid.estimated_diameter_max) / 2);
         return avgSize >= range.min && avgSize < range.max;
       }).length,
       color: range.color
     }));
 
-    // Orbital Data (Radar Chart)
-    const orbitalData = [
-      { subject: 'Size', A: Math.min(statistics.averageSize / 5, 100), fullMark: 100 },
-      { subject: 'Magnitude', A: Math.min(statistics.averageMagnitude * 5, 100), fullMark: 100 },
-      { subject: 'Hazard Rate', A: (hazardousCount / filteredAsteroids.length) * 100, fullMark: 100 },
-      { subject: 'Data Quality', A: 85, fullMark: 100 },
-      { subject: 'Coverage', A: Math.min((filteredAsteroids.length / 100) * 10, 100), fullMark: 100 }
+    // Velocity Distribution
+    const velocityRanges = [
+      { name: '< 20,000 km/h', min: 0, max: 20000, color: '#10b981' },
+      { name: '20-50k km/h', min: 20000, max: 50000, color: '#06b6d4' },
+      { name: '50-100k km/h', min: 50000, max: 100000, color: '#f59e0b' },
+      { name: '> 100k km/h', min: 100000, max: Infinity, color: '#ef4444' }
     ];
 
-    // Orbiting Bodies Data
-    const orbitingBodiesMap = new Map<string, number>();
+    const velocityDistribution = velocityRanges.map(range => ({
+      name: range.name,
+      value: filteredAsteroids.filter(asteroid => {
+        const vel = asteroid.velocity_kmh || 
+                   asteroid.close_approach_data?.[0]?.relative_velocity?.kilometers_per_hour;
+        const velocity = safeNumeric(vel);
+        return velocity >= range.min && velocity < range.max;
+      }).length,
+      color: range.color
+    }));
+
+    // Miss Distance Distribution
+    const distanceRanges = [
+      { name: '< 1M km', min: 0, max: 1000000, color: '#ef4444' },
+      { name: '1-10M km', min: 1000000, max: 10000000, color: '#f59e0b' },
+      { name: '10-50M km', min: 10000000, max: 50000000, color: '#06b6d4' },
+      { name: '> 50M km', min: 50000000, max: Infinity, color: '#10b981' }
+    ];
+
+    const missDistanceDistribution = distanceRanges.map(range => ({
+      name: range.name,
+      value: filteredAsteroids.filter(asteroid => {
+        const dist = asteroid.miss_distance_km || 
+                    asteroid.close_approach_data?.[0]?.miss_distance?.kilometers;
+        const distance = safeNumeric(dist);
+        return distance >= range.min && distance < range.max;
+      }).length,
+      color: range.color
+    }));
+
+    // Magnitude Distribution
+    const magnitudeRanges = [
+      { name: '< 15', min: 0, max: 15, color: '#ef4444' },
+      { name: '15-20', min: 15, max: 20, color: '#f59e0b' },
+      { name: '20-25', min: 20, max: 25, color: '#06b6d4' },
+      { name: '25-30', min: 25, max: 30, color: '#10b981' },
+      { name: '> 30', min: 30, max: Infinity, color: '#6b7280' }
+    ];
+
+    const magnitudeDistribution = magnitudeRanges.map(range => ({
+      name: range.name,
+      value: filteredAsteroids.filter(asteroid => {
+        const mag = safeNumeric(asteroid.absolute_magnitude_h);
+        return mag >= range.min && mag < range.max;
+      }).length,
+      color: range.color
+    }));
+
+    // Size vs Velocity Scatter Plot Data
+    const sizeVsVelocityData = filteredAsteroids.map(asteroid => {
+      const size = safeNumeric((asteroid.estimated_diameter_min + asteroid.estimated_diameter_max) / 2);
+      const vel = asteroid.velocity_kmh || 
+                 asteroid.close_approach_data?.[0]?.relative_velocity?.kilometers_per_hour;
+      const velocity = safeNumeric(vel);
+      
+      return {
+        x: size,
+        y: velocity,
+        name: asteroid.name,
+        hazardous: asteroid.is_potentially_hazardous_asteroid,
+        color: asteroid.is_potentially_hazardous_asteroid ? '#ef4444' : '#06b6d4'
+      };
+    }).filter(d => d.x > 0 && d.y > 0);
+
+    // Time Series Data (by approach date)
+    const dateMap = new Map<string, number>();
     filteredAsteroids.forEach(asteroid => {
-      const body = asteroid.orbiting_body || 'Unknown';
-      orbitingBodiesMap.set(body, (orbitingBodiesMap.get(body) || 0) + 1);
+      const date = asteroid.close_approach_date || 
+                  asteroid.close_approach_data?.[0]?.close_approach_date;
+      if (date) {
+        const dateKey = new Date(date).toISOString().split('T')[0];
+        dateMap.set(dateKey, (dateMap.get(dateKey) || 0) + 1);
+      }
     });
 
-    const colors = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981', '#f97316'];
-    const orbitingBodiesData = Array.from(orbitingBodiesMap.entries()).map(([body, count], index) => ({
-      name: body,
+    const timeSeriesData = Array.from(dateMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => ({
+        date,
+        count,
+        x: date,
+        y: count
+      }));
+
+    // Risk Assessment Radar Data
+    const avgHazardRatio = hazardousCount / Math.max(filteredAsteroids.length, 1);
+    const avgSizeNormalized = Math.min((statistics.averageSize / 1000) * 100, 100);
+    const avgVelocityNormalized = Math.min((statistics.averageVelocity / 100000) * 100, 100);
+    const avgDistanceScore = Math.max(0, 100 - (statistics.averageMissDistance / 100000000) * 100);
+    const dataQualityScore = filteredAsteroids.filter(a => 
+      a.close_approach_data && a.close_approach_data.length > 0
+    ).length / Math.max(filteredAsteroids.length, 1) * 100;
+
+    const riskAssessmentData = [
+      { subject: 'Hazard Ratio', A: avgHazardRatio * 100, fullMark: 100 },
+      { subject: 'Average Size', A: avgSizeNormalized, fullMark: 100 },
+      { subject: 'Velocity Risk', A: avgVelocityNormalized, fullMark: 100 },
+      { subject: 'Proximity Risk', A: avgDistanceScore, fullMark: 100 },
+      { subject: 'Data Quality', A: dataQualityScore, fullMark: 100 }
+    ];
+
+    // Approach Frequency Data
+    const monthMap = new Map<string, number>();
+    filteredAsteroids.forEach(asteroid => {
+      const date = asteroid.close_approach_date || 
+                  asteroid.close_approach_data?.[0]?.close_approach_date;
+      if (date) {
+        const month = new Date(date).toLocaleDateString('en-US', { month: 'short' });
+        monthMap.set(month, (monthMap.get(month) || 0) + 1);
+      }
+    });
+
+    const colors = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981', '#f97316', '#ec4899', '#06b6d4', '#84cc16', '#6366f1', '#14b8a6', '#f43f5e'];
+    const approachFrequencyData = Array.from(monthMap.entries()).map(([month, count], index) => ({
+      name: month,
       value: count,
       color: colors[index % colors.length]
     }));
@@ -172,8 +310,13 @@ export const useAnalyticsData = (
       hazardDistribution,
       sizeDistribution,
       hazardousSizeDistribution,
-      orbitalData,
-      orbitingBodiesData
+      velocityDistribution,
+      missDistanceDistribution,
+      magnitudeDistribution,
+      sizeVsVelocityData,
+      timeSeriesData,
+      riskAssessmentData,
+      approachFrequencyData
     };
   }, [asteroids, filters]);
 };

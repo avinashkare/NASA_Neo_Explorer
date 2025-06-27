@@ -20,21 +20,49 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({ data }) 
     );
   }
 
-  const maxY = Math.max(...data.map(d => d.count));
+  // Filter and validate data
+  const validData = data.filter(d => 
+    !isNaN(d.count) && isFinite(d.count) &&
+    d.count !== null && d.count !== undefined
+  );
+
+  if (validData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-400">
+        No valid data available for visualization
+      </div>
+    );
+  }
+
+  const maxY = Math.max(...validData.map(d => d.count));
   const width = 300;
   const height = 200;
   const padding = 40;
 
-  const scaleX = (index: number) => (index / (data.length - 1)) * (width - 2 * padding) + padding;
-  const scaleY = (y: number) => height - padding - (y / maxY) * (height - 2 * padding);
+  const scaleX = (index: number) => {
+    if (validData.length <= 1) return width / 2;
+    return (index / (validData.length - 1)) * (width - 2 * padding) + padding;
+  };
+  
+  const scaleY = (y: number) => {
+    if (maxY === 0) return height - padding;
+    return height - padding - (y / maxY) * (height - 2 * padding);
+  };
 
-  const pathData = data.map((point, index) => {
+  const pathData = validData.map((point, index) => {
     const x = scaleX(index);
     const y = scaleY(point.count);
+    
+    if (isNaN(x) || isNaN(y) || !isFinite(x) || !isFinite(y)) {
+      return '';
+    }
+    
     return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-  }).join(' ');
+  }).filter(segment => segment !== '').join(' ');
 
-  const areaData = `${pathData} L ${scaleX(data.length - 1)} ${height - padding} L ${scaleX(0)} ${height - padding} Z`;
+  const areaData = pathData ? 
+    `${pathData} L ${scaleX(validData.length - 1)} ${height - padding} L ${scaleX(0)} ${height - padding} Z` : 
+    '';
 
   return (
     <div className="flex items-center justify-center h-full">
@@ -56,36 +84,49 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({ data }) 
         <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#6b7280" strokeWidth="2" />
         
         {/* Area */}
-        <path
-          d={areaData}
-          fill="url(#areaGradient)"
-        />
+        {areaData && (
+          <path
+            d={areaData}
+            fill="url(#areaGradient)"
+          />
+        )}
         
         {/* Line */}
-        <path
-          d={pathData}
-          fill="none"
-          stroke="#3b82f6"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        {pathData && (
+          <path
+            d={pathData}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
         
         {/* Data points */}
-        {data.map((point, index) => (
-          <circle
-            key={index}
-            cx={scaleX(index)}
-            cy={scaleY(point.count)}
-            r="4"
-            fill="#3b82f6"
-            stroke="#ffffff"
-            strokeWidth="2"
-            className="hover:r-6 transition-all duration-200 cursor-pointer"
-          >
-            <title>{`${point.date}: ${point.count} asteroids`}</title>
-          </circle>
-        ))}
+        {validData.map((point, index) => {
+          const cx = scaleX(index);
+          const cy = scaleY(point.count);
+          
+          if (isNaN(cx) || isNaN(cy) || !isFinite(cx) || !isFinite(cy)) {
+            return null;
+          }
+          
+          return (
+            <circle
+              key={index}
+              cx={cx}
+              cy={cy}
+              r="4"
+              fill="#3b82f6"
+              stroke="#ffffff"
+              strokeWidth="2"
+              className="hover:r-6 transition-all duration-200 cursor-pointer"
+            >
+              <title>{`${point.date}: ${point.count} asteroids`}</title>
+            </circle>
+          );
+        })}
         
         {/* Axis labels */}
         <text x={width / 2} y={height - 5} textAnchor="middle" className="fill-gray-400 text-xs">

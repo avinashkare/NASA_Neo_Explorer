@@ -4,8 +4,9 @@ import {
   AlertTriangle, 
   Ruler, 
   Globe, 
-  Activity,
-  Database
+  Database,
+  Zap,
+  Target
 } from 'lucide-react';
 import { AnalyticsStatistics } from '../../hooks/useAnalyticsData';
 import { Asteroid } from '../../types/asteroid';
@@ -32,7 +33,7 @@ export const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({
       value: statistics.hazardousCount.toLocaleString(),
       icon: <AlertTriangle className="text-red-400" size={24} />,
       color: 'red',
-      change: `${((statistics.hazardousCount / statistics.totalAsteroids) * 100).toFixed(1)}%`,
+      change: `${((statistics.hazardousCount / Math.max(statistics.totalAsteroids, 1)) * 100).toFixed(1)}%`,
       description: 'Potentially hazardous asteroids'
     },
     {
@@ -50,6 +51,22 @@ export const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({
       color: 'purple',
       change: null,
       description: 'Maximum diameter found'
+    },
+    {
+      title: 'Average Velocity',
+      value: `${(statistics.averageVelocity / 1000).toFixed(1)}k km/h`,
+      icon: <Zap className="text-yellow-400" size={24} />,
+      color: 'yellow',
+      change: null,
+      description: 'Mean approach velocity'
+    },
+    {
+      title: 'Average Miss Distance',
+      value: `${(statistics.averageMissDistance / 1000000).toFixed(1)}M km`,
+      icon: <Target className="text-green-400" size={24} />,
+      color: 'green',
+      change: null,
+      description: 'Mean distance from Earth'
     }
   ];
 
@@ -58,37 +75,51 @@ export const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({
       cyan: 'from-cyan-600/20 to-cyan-800/20 border-cyan-500/30',
       red: 'from-red-600/20 to-red-800/20 border-red-500/30',
       blue: 'from-blue-600/20 to-blue-800/20 border-blue-500/30',
-      purple: 'from-purple-600/20 to-purple-800/20 border-purple-500/30'
+      purple: 'from-purple-600/20 to-purple-800/20 border-purple-500/30',
+      yellow: 'from-yellow-600/20 to-yellow-800/20 border-yellow-500/30',
+      green: 'from-green-600/20 to-green-800/20 border-green-500/30'
     };
     return colorMap[color as keyof typeof colorMap] || colorMap.cyan;
   };
 
-  // Key insights based on data
+  // Enhanced key insights based on data
   const keyInsights = [
     {
       title: 'Risk Assessment',
-      description: `${((statistics.hazardousCount / statistics.totalAsteroids) * 100).toFixed(1)}% of tracked asteroids are potentially hazardous`,
+      description: `${((statistics.hazardousCount / Math.max(statistics.totalAsteroids, 1)) * 100).toFixed(1)}% of tracked asteroids are potentially hazardous`,
       type: statistics.hazardousCount > statistics.totalAsteroids * 0.1 ? 'warning' : 'info',
       icon: <AlertTriangle size={20} />
     },
     {
-      title: 'Size Distribution',
-      description: statistics.averageSize > 100 ? 'Dataset contains relatively large objects' : 'Most objects are small to medium-sized',
+      title: 'Size Analysis',
+      description: statistics.averageSize > 100 ? 
+        `Large objects detected - average size ${statistics.averageSize.toFixed(0)}m indicates significant objects` : 
+        `Mostly small to medium objects - average size ${statistics.averageSize.toFixed(0)}m`,
       type: 'info',
       icon: <Ruler size={20} />
     },
     {
-      title: 'Data Coverage',
-      description: `Analyzing ${statistics.totalAsteroids} near-Earth objects with comprehensive orbital data`,
-      type: 'info',
-      icon: <Activity size={20} />
+      title: 'Velocity Patterns',
+      description: statistics.averageVelocity > 50000 ? 
+        'High-speed objects detected - enhanced monitoring recommended' : 
+        'Normal velocity range observed across the dataset',
+      type: statistics.averageVelocity > 75000 ? 'warning' : 'info',
+      icon: <Zap size={20} />
+    },
+    {
+      title: 'Proximity Analysis',
+      description: statistics.averageMissDistance < 10000000 ? 
+        'Close approaches detected - objects passing within 10M km of Earth' : 
+        'Safe distances maintained - most objects pass at comfortable distances',
+      type: statistics.averageMissDistance < 5000000 ? 'warning' : 'info',
+      icon: <Target size={20} />
     }
   ];
 
   return (
     <div className="space-y-6">
       {/* Statistics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {insights.map((insight, index) => (
           <div
             key={index}
@@ -126,10 +157,10 @@ export const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({
       <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <TrendingUp className="text-purple-400" size={20} />
-          Key Insights
+          Advanced Analytics Insights
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {keyInsights.map((insight, index) => (
             <div
               key={index}
@@ -156,6 +187,28 @@ export const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Additional Metrics */}
+        <div className="mt-6 pt-6 border-t border-gray-700">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-cyan-400">{statistics.totalApproaches}</div>
+              <div className="text-sm text-gray-400">Total Approaches</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-purple-400">{statistics.averageMagnitude.toFixed(1)}</div>
+              <div className="text-sm text-gray-400">Avg Magnitude</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-yellow-400">{(statistics.averageVelocity / 1000).toFixed(0)}k</div>
+              <div className="text-sm text-gray-400">Avg Speed (km/h)</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-green-400">{(statistics.averageMissDistance / 1000000).toFixed(1)}M</div>
+              <div className="text-sm text-gray-400">Avg Distance (km)</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
