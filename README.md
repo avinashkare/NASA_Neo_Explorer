@@ -203,23 +203,26 @@ const speed = baseSpeed * (300 / position.distance);
 Create Postgres instance and connect using external_url
 
 ### Backend (Render)
+```bash
+# Add Procfile
+echo "web: node app.js" > Procfile
+```
+
 Create WebService with below configurations :
 
-- **Root Directory**: ./backend
+Root Directory :
+```bash
+./backend
+```
 
-Build Command
+Build Command :
 ```bash
 npm install
 ```
 
-Start Command
+Start Command :
 ```bash
 node app.js
-```
-
-```bash
-# Add Procfile
-echo "web: node app.js" > Procfile
 
 # Set environment variables
 NASA_BASE_URL=https://api.nasa.gov/neo/rest/v1
@@ -230,7 +233,10 @@ DATABASE_URL=your_postgres_url
 ### Fronend (Render)
 Create WebService with below configurations :
 
-- **Root Directory**: ./frontend
+Root Directory
+```bash
+./frontend
+```
 
 Build Command
 ```bash
