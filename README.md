@@ -199,21 +199,51 @@ const speed = baseSpeed * (300 / position.distance);
 
 ## 📦 Deployment
 
-### Frontend (Render)
-```bash
-npm run build
-# Deploy dist/ folder
-```
+### Database Setup (Render)
+Create Postgres instance and connect using external_url
 
 ### Backend (Render)
+Create WebService with below configurations :
+
+- **Root Directory**: ./backend
+
+Build Command
+```bash
+npm install
+```
+
+Start Command
+```bash
+node app.js
+```
+
 ```bash
 # Add Procfile
 echo "web: node app.js" > Procfile
 
 # Set environment variables
+NASA_BASE_URL=https://api.nasa.gov/neo/rest/v1
 NASA_API_KEY=your_key_here
 DATABASE_URL=your_postgres_url
 ```
+
+### Fronend (Render)
+Create WebService with below configurations :
+
+- **Root Directory**: ./frontend
+
+Build Command
+```bash
+npm install && npm run build
+```
+
+Start Command
+```bash
+npm run start
+```
+
+# Set environment variables
+VITE_BASE_URL=your_backend_webservice_adderess_here
 
 ## 📚 Data Sources
 
