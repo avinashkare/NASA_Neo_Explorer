@@ -66,7 +66,7 @@ A modern, interactive web application for exploring Near Earth Objects (NEOs) fr
    -- Run the schema (from root directory)
    psql -d asteroid_db -f database/schema.sql
 
-   --- Create asteroids table
+   -- Create asteroids table
    CREATE TABLE asteroids (
   id SERIAL,
   neo_reference_id VARCHAR(255) primary key,
@@ -90,7 +90,7 @@ A modern, interactive web application for exploring Near Earth Objects (NEOs) fr
   date_range_end DATE,
   CONSTRAINT unique_neo_reference UNIQUE (neo_reference_id)
 );
-
+   ```
 
 4. **Environment configuration**
    Create `.env` file in the backend directory:
