@@ -15,6 +15,12 @@ const errorHandler = (err, req, res, next) => {
   } else if (err.name === 'UnauthorizedError') {
     statusCode = 401;
     message = 'Unauthorized';
+  } else if (err.code === 'ECONNREFUSED') {
+    statusCode = 503;
+    message = 'Database connection failed';
+  } else if (err.code === 'ENOTFOUND') {
+    statusCode = 503;
+    message = 'External service unavailable';
   } else if (err.message) {
     message = err.message;
   }
